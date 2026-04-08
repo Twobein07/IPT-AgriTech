@@ -56,6 +56,9 @@
                             <td>{% if irr.water_amount_liters %}{{ irr.water_amount_liters|floatformat:0 }}L{% else %}-{% endif %}</td>
                             <td>{{ irr.reason }}</td>
                             <td>{% if irr.days_until_next %}{{ irr.days_until_next }} days{% else %}-{% endif %}</td>
+                            <td>
+                                <a href="/irrigation/delete/{{ irr.id }}/" class="btn btn-sm btn-outline-danger">Delete</a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

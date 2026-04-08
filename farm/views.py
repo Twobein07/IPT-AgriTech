@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.db.models import Avg, Max, Count
-from .models import Farm, SensorNode, SensorReading, DiseaseRisk, IrrigationRecommendation, YieldForecast
+from .models import Farm, SensorNode, SensorReading, DiseaseRisk, IrrigationRecommendation, YieldForecast, CropType
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -13,7 +16,6 @@ def dashboard(request):
     readings = SensorReading.objects.all()
     risks = DiseaseRisk.objects.all()
     irrigations = IrrigationRecommendation.objects.all()
-    forecasts = YieldForecast.objects.all()
     
     farm_data = []
     for farm in farms:
@@ -31,7 +33,7 @@ def dashboard(request):
         'farms': farms, 'nodes': nodes, 'readings_count': readings.count(),
         'risks_count': risks.count(), 'farm_data': farm_data,
         'risk_counts': risk_counts, 'irr_needed': irrigations.filter(needed=True).count(),
-        'irr_delayed': irrigations.filter(needed=False).count(), 'forecasts': forecasts,
+        'irr_delayed': irrigations.filter(needed=False).count(), 'forecasts': YieldForecast.objects.all(),
     })
 
 def farms_view(request):
@@ -59,6 +61,81 @@ def irrigation_view(request):
 def yield_view(request):
     return render(request, 'yield.html', {'forecasts': YieldForecast.objects.select_related('farm').all()})
 
+# CRUD: Farm Create
+def farm_create(request):
+    if request.method == 'POST':
+        Farm.objects.create(
+            name=request.POST.get('name'),
+            owner=request.POST.get('owner'),
+            location=request.POST.get('location'),
+            crop_type=request.POST.get('crop_type'),
+            area_hectares=float(request.POST.get('area_hectares', 1))
+        )
+        return redirect('farms')
+    crops = CropType.choices
+    return render(request, 'farm_form.html', {'action': 'Create', 'crops': crops})
+
+# CRUD: Farm Edit
+def farm_edit(request, farm_id):
+    farm = Farm.objects.get(id=farm_id)
+    if request.method == 'POST':
+        farm.name = request.POST.get('name')
+        farm.owner = request.POST.get('owner')
+        farm.location = request.POST.get('location')
+        farm.crop_type = request.POST.get('crop_type')
+        farm.area_hectares = float(request.POST.get('area_hectares', 1))
+        farm.save()
+        return redirect('farms')
+    crops = CropType.choices
+    return render(request, 'farm_form.html', {'action': 'Edit', 'farm': farm, 'crops': crops})
+
+# CRUD: Farm Delete
+def farm_delete(request, farm_id):
+    farm = Farm.objects.get(id=farm_id)
+    if request.method == 'POST':
+        farm.delete()
+        return redirect('farms')
+    return render(request, 'confirm_delete.html', {'item': farm, 'type': 'Farm'})
+
+# CRUD: Sensor Node Create
+def node_create(request):
+    if request.method == 'POST':
+        SensorNode.objects.create(
+            node_id=request.POST.get('node_id'),
+            farm_id=request.POST.get('farm'),
+            latitude=float(request.POST.get('latitude', 0)),
+            longitude=float(request.POST.get('longitude', 0)),
+            is_active=True
+        )
+        return redirect('sensors')
+    farms = Farm.objects.all()
+    return render(request, 'node_form.html', {'action': 'Create', 'farms': farms})
+
+# CRUD: Sensor Node Delete
+def node_delete(request, node_id):
+    node = SensorNode.objects.get(id=node_id)
+    if request.method == 'POST':
+        node.delete()
+        return redirect('sensors')
+    return render(request, 'confirm_delete.html', {'item': node, 'type': 'Sensor Node'})
+
+# CRUD: Disease Risk Resolve
+def risk_resolve(request, risk_id):
+    risk = DiseaseRisk.objects.get(id=risk_id)
+    if request.method == 'POST':
+        risk.is_resolved = True
+        risk.save()
+        return redirect('disease')
+    return render(request, 'confirm_delete.html', {'item': risk, 'type': 'Disease Risk', 'action': 'Resolve'})
+
+# CRUD: Irrigation Delete
+def irrigation_delete(request, irr_id):
+    irr = IrrigationRecommendation.objects.get(id=irr_id)
+    if request.method == 'POST':
+        irr.delete()
+        return redirect('irrigation')
+    return render(request, 'confirm_delete.html', {'item': irr, 'type': 'Irrigation Rec'})
+
 # API Views
 class FarmViewSet(viewsets.ModelViewSet):
     queryset = Farm.objects.all()
@@ -83,8 +160,8 @@ class DiseaseRiskViewSet(viewsets.ModelViewSet):
         return Response(DiseaseRiskSerializer(DiseaseRisk.objects.filter(is_resolved=False), many=True).data)
 
 # API Cheatcode:
-# GET    /api/farms/           -> list farms
-# POST   /api/farms/           -> create farm
-# GET    /api/farms/{id}/      -> get farm
-# PUT    /api/farms/{id}/      -> update farm  
-# DELETE /api/farms/{id}/      -> delete farm
+# GET    /api/farms/           -> list farms (GET)
+# POST   /api/farms/           -> create farm (POST)
+# GET    /api/farms/{id}/      -> get farm (GET)
+# PUT    /api/farms/{id}/      -> update farm (PUT)
+# DELETE /api/farms/{id}/      -> delete farm (DELETE)

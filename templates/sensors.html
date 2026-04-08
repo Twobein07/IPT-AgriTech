@@ -26,7 +26,10 @@
                 </nav>
             </div>
             <div class="col-md-10 p-4">
-                <h2 class="text-success mb-4">Sensor Nodes</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-success mb-0"><i class="bi bi-cpu"></i> Sensor Nodes</h2>
+                    <a href="/sensors/create/" class="btn btn-success"><i class="bi bi-plus-circle"></i> Add Sensor</a>
+                </div>
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -34,6 +37,7 @@
                             <th>Farm</th>
                             <th>Location</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,6 +52,9 @@
                                 {% else %}
                                 <span class="badge bg-secondary">Inactive</span>
                                 {% endif %}
+                            </td>
+                            <td>
+                                <a href="/sensors/delete/{{ node.id }}/" class="btn btn-sm btn-outline-danger">Delete</a>
                             </td>
                         </tr>
                         {% endfor %}

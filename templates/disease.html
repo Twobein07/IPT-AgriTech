@@ -60,6 +60,11 @@
                                 {% if risk.is_resolved %}<span class="badge bg-success">Resolved</span>
                                 {% else %}<span class="badge bg-danger">Active</span>{% endif %}
                             </td>
+                            <td>
+                                {% if not risk.is_resolved %}
+                                <a href="/disease/resolve/{{ risk.id }}/" class="btn btn-sm btn-outline-success">Resolve</a>
+                                {% else %}-{% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
