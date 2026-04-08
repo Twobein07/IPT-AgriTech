@@ -8,6 +8,9 @@ router.register(r'readings', views.SensorReadingViewSet)
 router.register(r'disease-risks', views.DiseaseRiskViewSet)
 
 urlpatterns = [
+    # API FIRST (so it doesn't get caught by web views)
+    path('api/', include(router.urls)),
+    
     # Web Pages
     path('', views.dashboard, name='dashboard'),
     path('farms/', views.farms_view, name='farms'),
@@ -30,9 +33,6 @@ urlpatterns = [
     
     # CRUD: Irrigation
     path('irrigation/delete/<int:irr_id>/', views.irrigation_delete, name='irrigation_delete'),
-    
-    # API
-    path('api/', include(router.urls)),
 ]
 
 # API CRUD Cheatcode:
