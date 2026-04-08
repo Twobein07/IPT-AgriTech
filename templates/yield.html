@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Yield Forecast - FarmShield</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .sidebar { background: #1a472a; min-height: 100vh; }
+        .nav-link { color: #d4e6d9; }
+        .nav-link:hover, .nav-link.active { background: #2d5a3a; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar p-0">
+                <div class="p-3 text-center"><h4 class="text-success">FarmShield</h4></div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/">Dashboard</a>
+                    <a class="nav-link" href="/farms/">Farms</a>
+                    <a class="nav-link" href="/sensors/">Sensors</a>
+                    <a class="nav-link" href="/disease/">Disease Risk</a>
+                    <a class="nav-link" href="/irrigation/">Irrigation</a>
+                    <a class="nav-link active" href="/yield/">Yield Forecast</a>
+                </nav>
+            </div>
+            <div class="col-md-10 p-4">
+                <h2 class="text-success mb-4">Yield Forecasts</h2>
+                <div class="row">
+                    {% for forecast in forecasts %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-header bg-success text-white d-flex justify-content-between">
+                                <span>{{ forecast.farm.name }}</span>
+                                <span>{{ forecast.farm.get_crop_type_display }}</span>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="text-success">{{ forecast.predicted_yield_kg|floatformat:0 }} kg</h3>
+                                <p class="mb-1"><i class="bi bi-calendar"></i> Harvest: {{ forecast.harvest_date }}</p>
+                                <p class="mb-1"><i class="bi bi-check-circle"></i> Confidence: {{ forecast.confidence|floatformat:0 }}%</p>
+                                <p><span class="badge bg-{% if forecast.crop_condition == 'Excellent' %}success{% elif forecast.crop_condition == 'Good' %}info{% elif forecast.crop_condition == 'Fair' %}warning{% else %}danger{% endif %}">{{ forecast.crop_condition }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Disease Risk - FarmShield</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .sidebar { background: #1a472a; min-height: 100vh; }
+        .nav-link { color: #d4e6d9; }
+        .nav-link:hover, .nav-link.active { background: #2d5a3a; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar p-0">
+                <div class="p-3 text-center"><h4 class="text-success">FarmShield</h4></div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/">Dashboard</a>
+                    <a class="nav-link" href="/farms/">Farms</a>
+                    <a class="nav-link" href="/sensors/">Sensors</a>
+                    <a class="nav-link active" href="/disease/">Disease Risk</a>
+                    <a class="nav-link" href="/irrigation/">Irrigation</a>
+                    <a class="nav-link" href="/yield/">Yield Forecast</a>
+                </nav>
+            </div>
+            <div class="col-md-10 p-4">
+                <h2 class="text-success mb-4">Disease Risk Analysis</h2>
+                <div class="mb-3">
+                    <a href="/disease/" class="btn btn-sm btn-outline-success">All</a>
+                    <a href="?level=HIGH" class="btn btn-sm btn-outline-danger">High</a>
+                    <a href="?level=MEDIUM" class="btn btn-sm btn-outline-warning">Medium</a>
+                    <a href="?level=LOW" class="btn btn-sm btn-outline-info">Low</a>
+                </div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Farm</th>
+                            <th>Disease</th>
+                            <th>Risk</th>
+                            <th>Probability</th>
+                            <th>Recommendation</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for risk in risks %}
+                        <tr>
+                            <td>{{ risk.farm.name }}</td>
+                            <td>{{ risk.disease_type }}</td>
+                            <td>
+                                {% if risk.risk_level == 'HIGH' %}<span class="badge bg-danger">HIGH</span>
+                                {% elif risk.risk_level == 'MEDIUM' %}<span class="badge bg-warning">MEDIUM</span>
+                                {% else %}<span class="badge bg-success">LOW</span>{% endif %}
+                            </td>
+                            <td>{{ risk.probability|floatformat:0 }}%</td>
+                            <td>{{ risk.recommendation }}</td>
+                            <td>
+                                {% if risk.is_resolved %}<span class="badge bg-success">Resolved</span>
+                                {% else %}<span class="badge bg-danger">Active</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

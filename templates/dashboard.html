@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmShield AgriTech</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f5f5f0; }
+        .sidebar { background: #1a472a; min-height: 100vh; }
+        .nav-link { color: #d4e6d9; padding: 12px 20px; }
+        .nav-link:hover { background: #2d5a3a; color: #fff; }
+        .nav-link.active { background: #4caf50; color: #fff; }
+        .card { border: none; border-radius: 10px; }
+        .stat-card:hover { transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar p-0">
+                <div class="p-3 text-center border-bottom border-success">
+                    <h4 class="text-success"><i class="bi bi-flower1"></i> FarmShield</h4>
+                    <small class="text-light">AgriTech AI</small>
+                </div>
+                <nav class="nav flex-column">
+                    <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+                    <a class="nav-link" href="/farms/"><i class="bi bi-tree me-2"></i> Farms</a>
+                    <a class="nav-link" href="/sensors/"><i class="bi bi-cpu me-2"></i> Sensors</a>
+                    <a class="nav-link" href="/disease/"><i class="bi bi-exclamation-triangle me-2"></i> Disease Risk</a>
+                    <a class="nav-link" href="/irrigation/"><i class="bi bi-water me-2"></i> Irrigation</a>
+                    <a class="nav-link" href="/yield/"><i class="bi bi-graph-up me-2"></i> Yield Forecast</a>
+                </nav>
+            </div>
+            <div class="col-md-10 p-4">
+                <h2 class="mb-4 text-success"><i class="bi bi-speedometer2"></i> Farm Dashboard</h2>
+                
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="text-white-50">FARMS</h5>
+                                <h3>{{ farms.count }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-info text-white">
+                            <div class="card-body">
+                                <h5 class="text-white-50">SENSORS</h5>
+                                <h3>{{ nodes.count }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-warning text-dark">
+                            <div class="card-body">
+                                <h5 class="text-dark-50">READINGS</h5>
+                                <h3>{{ readings_count }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stat-card bg-danger text-white">
+                            <div class="card-body">
+                                <h5 class="text-white-50">RISKS</h5>
+                                <h3>{{ risks_count }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-white"><h5>Active Disease Risks</h5></div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-danger">HIGH</span>
+                                    <strong>{{ risk_counts.HIGH }}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-warning">MEDIUM</span>
+                                    <strong>{{ risk_counts.MEDIUM }}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-success">LOW</span>
+                                    <strong>{{ risk_counts.LOW }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-white"><h5>Irrigation Status</h5></div>
+                            <div class="card-body text-center">
+                                <h4 class="text-info">{{ irr_needed }} Need Water</h4>
+                                <p class="text-muted">{{ irr_delayed }} Can Delay</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-white"><h5>Farm Overview</h5></div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Farm</th>
+                                    <th>Crop</th>
+                                    <th>Soil Moisture</th>
+                                    <th>Temp</th>
+                                    <th>Humidity</th>
+                                    <th>Risks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in farm_data %}
+                                <tr>
+                                    <td><strong>{{ item.farm.name }}</strong></td>
+                                    <td>{{ item.farm.get_crop_type_display }}</td>
+                                    <td>{% if item.latest %}{{ item.latest.soil_moisture }}%{% else %}-{% endif %}</td>
+                                    <td>{% if item.latest %}{{ item.latest.air_temperature }}°C{% else %}-{% endif %}</td>
+                                    <td>{% if item.latest %}{{ item.latest.humidity }}%{% else %}-{% endif %}</td>
+                                    <td>
+                                        {% if item.active_risks > 0 %}
+                                        <span class="badge bg-danger">{{ item.active_risks }}</span>
+                                        {% else %}
+                                        <span class="badge bg-success">OK</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

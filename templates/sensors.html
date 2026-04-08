@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sensors - FarmShield</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .sidebar { background: #1a472a; min-height: 100vh; }
+        .nav-link { color: #d4e6d9; }
+        .nav-link:hover, .nav-link.active { background: #2d5a3a; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-2 sidebar p-0">
+                <div class="p-3 text-center"><h4 class="text-success">FarmShield</h4></div>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="/">Dashboard</a>
+                    <a class="nav-link" href="/farms/">Farms</a>
+                    <a class="nav-link active" href="/sensors/">Sensors</a>
+                    <a class="nav-link" href="/disease/">Disease Risk</a>
+                    <a class="nav-link" href="/irrigation/">Irrigation</a>
+                    <a class="nav-link" href="/yield/">Yield Forecast</a>
+                </nav>
+            </div>
+            <div class="col-md-10 p-4">
+                <h2 class="text-success mb-4">Sensor Nodes</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Node ID</th>
+                            <th>Farm</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for node in nodes %}
+                        <tr>
+                            <td><strong>{{ node.node_id }}</strong></td>
+                            <td>{{ node.farm.name }}</td>
+                            <td>{{ node.latitude|floatformat:2 }}, {{ node.longitude|floatformat:2 }}</td>
+                            <td>
+                                {% if node.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
